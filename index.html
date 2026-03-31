@@ -2,34 +2,59 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title> Algoritmos - 2º Ano</title>
+    <title>Avaliação de Algoritmos - 2º Ano</title>
     <style>
         body { font-family: 'Arial', sans-serif; background-color: #eef2f3; text-align: center; padding: 20px; }
-        .container { background: white; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; font-size: 24px; }
+        .container { background: white; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+        
+        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 5px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 20px; }
+
+        /* Estilo do Grid */
         #grid { 
             display: grid; grid-template-columns: repeat(5, 50px); grid-template-rows: repeat(5, 50px); 
             gap: 5px; background-color: #34495e; padding: 10px; border-radius: 10px; margin: 20px auto; width: 270px;
         }
-        .cell { width: 50px; height: 50px; background-color: #ecf0f1; display: flex; align-items: center; justify-content: center; font-size: 25px; border-radius: 5px; }
-        .controls button { padding: 12px; font-size: 18px; cursor: pointer; border: none; border-radius: 8px; margin: 5px; transition: 0.2s; }
-        .btn-move { background-color: #3498db; color: white; }
-        .btn-run { background-color: #27ae60; color: white; width: 80%; font-weight: bold; }
-        .btn-reset { background-color: #e74c3c; color: white; }
-        #sequence { background: #f8f9fa; border: 1px dashed #ccc; padding: 10px; min-height: 40px; margin: 15px 0; border-radius: 8px; font-size: 20px; }
-        #result-card { display: none; margin-top: 20px; padding: 20px; border-radius: 10px; border: 2px solid #27ae60; background-color: #f0fff4; }
-        .score { font-size: 40px; font-weight: bold; color: #27ae60; }
+        .cell { width: 50px; height: 50px; background-color: #ecf0f1; display: flex; align-items: center; justify-content: center; font-size: 25px; border-radius: 5px; transition: 0.3s; }
+        
+        /* Área de Mensagens Coloridas (Substitui o Alert) */
+        #status-message {
+            min-height: 60px; margin: 15px 0; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px;
+            display: flex; align-items: center; justify-content: center; transition: 0.5s; background-color: #f8f9fa; border: 2px solid #ddd;
+        }
+        .msg-error { background-color: #ffebee !important; color: #c62828 !important; border-color: #ef9a9a !important; animation: shake 0.5s; }
+        .msg-success { background-color: #e8f5e9 !important; color: #2e7d32 !important; border-color: #a5d6a7 !important; font-size: 22px !important; }
+
+        /* Controles */
+        .controls button { padding: 12px; font-size: 18px; cursor: pointer; border: none; border-radius: 8px; margin: 5px; transition: 0.2s; font-weight: bold; }
+        .btn-move { background-color: #3498db; color: white; box-shadow: 0 4px #2980b9; }
+        .btn-move:active { box-shadow: 0 0 #2980b9; transform: translateY(4px); }
+        .btn-run { background-color: #27ae60; color: white; width: 80%; margin-top: 15px; box-shadow: 0 4px #1e8449; }
+        .btn-reset { background-color: #e74c3c; color: white; box-shadow: 0 4px #c0392b; }
+
+        #sequence-display { background: #34495e; color: #f1c40f; padding: 10px; min-height: 40px; margin: 15px 0; border-radius: 8px; font-size: 20px; word-wrap: break-word; }
+
+        /* Animação de erro */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📝 MISSÃO ALGORITMO</h1>
-    <p>CRIE UMA SEQUÊNCIA DE COMANDOS PARA O 🤖 CHEGAR ATÉ A 🍎.</p>
+    <h1>🤖 Missão Algoritmo</h1>
+    <p class="subtitle">Leve o robô até a maçã clicando nas setas!</p>
     
     <div id="grid"></div>
 
-    <div id="sequence">Seu Algoritmo: </div>
+    <div id="status-message">Aguardando seu comando...</div>
+
+    <div id="sequence-display">💻 Algoritmo: </div>
 
     <div class="controls">
         <button class="btn-move" onclick="addStep('⬆️')">⬆️</button>
@@ -37,26 +62,28 @@
         <button class="btn-move" onclick="addStep('⬅️')">⬅️</button>
         <button class="btn-move" onclick="addStep('➡️')">➡️</button>
         <br>
-        <button class="btn-run" onclick="runAlgorithm()">▶️ TESTAR ALGORITMO</button>
+        <button class="btn-run" onclick="runAlgorithm()">▶️ EXECUTAR ALGORITMO</button>
         <button class="btn-reset" onclick="resetGame()">🔄 Limpar</button>
-    </div>
-
-    <div id="result-card">
-        <h2>Resultado Final</h2>
-        <p>Tentativas: <span id="tries-display">0</span></p>
-        <div class="score" id="final-score">0</div>
-        <p id="feedback-msg"></p>
-        <button onclick="location.reload()">Refazer Teste</button>
     </div>
 </div>
 
 <script>
     const size = 5;
     let robotPos = { x: 0, y: 0 };
-    let goalPos = { x: 3, y: 3 }; // Alvo fixo para avaliação
+    let goalPos = { x: 0, y: 0 }; 
     let steps = [];
     let tries = 0;
     let finished = false;
+    let isRunning = false;
+
+    function generateRandomGoal() {
+        let newX, newY;
+        do {
+            newX = Math.floor(Math.random() * size);
+            newY = Math.floor(Math.random() * size);
+        } while (newX === 0 && newY === 0);
+        goalPos = { x: newX, y: newY };
+    }
 
     function createGrid() {
         const grid = document.getElementById('grid');
@@ -72,68 +99,72 @@
         }
     }
 
+    function updateMessage(text, type) {
+        const msgDiv = document.getElementById('status-message');
+        msgDiv.innerText = text;
+        msgDiv.className = ''; // Limpa classes
+        if (type === 'error') msgDiv.classList.add('msg-error');
+        if (type === 'success') msgDiv.classList.add('msg-success');
+    }
+
     function addStep(dir) {
-        if(finished) return;
-        if (steps.length < 12) {
+        if(finished || isRunning) return;
+        if (steps.length < 20) {
             steps.push(dir);
-            document.getElementById('sequence').innerText = "Seu Algoritmo: " + steps.join(' ');
+            document.getElementById('sequence-display').innerText = "💻 Algoritmo: " + steps.join(' ');
+            updateMessage("Montando sequência...", "");
         }
     }
 
     async function runAlgorithm() {
-        if(finished || steps.length === 0) return;
+        if(finished || steps.length === 0 || isRunning) return;
         
+        isRunning = true;
         tries++;
-        let tempPos = { x: 0, y: 0 };
+        updateMessage("Executando passos...", "");
+        
+        let currentPos = { x: 0, y: 0 };
         
         for (let move of steps) {
-            if (move === '⬆️' && tempPos.y > 0) tempPos.y--;
-            else if (move === '⬇️' && tempPos.y < size - 1) tempPos.y++;
-            else if (move === '⬅️' && tempPos.x > 0) tempPos.x--;
-            else if (move === '➡️' && tempPos.x < size - 1) tempPos.x++;
-            
-            robotPos = { ...tempPos };
-            createGrid();
             await new Promise(r => setTimeout(r, 400));
+            if (move === '⬆️' && currentPos.y > 0) currentPos.y--;
+            else if (move === '⬇️' && currentPos.y < size - 1) currentPos.y++;
+            else if (move === '⬅️' && currentPos.x > 0) currentPos.x--;
+            else if (move === '➡️' && currentPos.x < size - 1) currentPos.x++;
+            
+            robotPos = { ...currentPos };
+            createGrid();
         }
 
-        checkWin();
+        checkResult();
     }
 
-    function checkWin() {
+    function checkResult() {
+        isRunning = false;
         if (robotPos.x === goalPos.x && robotPos.y === goalPos.y) {
             finished = true;
-            calculateScore();
+            let score = (tries === 1) ? 10 : (tries === 2) ? 8 : (tries === 3) ? 6 : 5;
+            updateMessage(`🎉 NOTA: ${score} (Tentativas: ${tries})`, "success");
         } else {
-            alert("O robô não chegou na maçã! Tente ajustar seu algoritmo.");
-            robotPos = { x: 0, y: 0 };
-            createGrid();
+            updateMessage("❌ O robô se perdeu! Tente ajustar o algoritmo.", "error");
+            setTimeout(() => {
+                robotPos = { x: 0, y: 0 };
+                createGrid();
+            }, 1500);
         }
-    }
-
-    function calculateScore() {
-        let score = 0;
-        let msg = "";
-
-        if (tries === 1) { score = 10; msg = "Excelente! Domínio total dos algoritmos!"; }
-        else if (tries === 2) { score = 8; msg = "Muito bom! Você corrigiu seu algoritmo."; }
-        else if (tries === 3) { score = 6; msg = "Bom! Você conseguiu chegar ao objetivo."; }
-        else { score = 5; msg = "Você chegou lá! Mas tente planejar melhor na próxima."; }
-
-        document.getElementById('result-card').style.display = 'block';
-        document.getElementById('final-score').innerText = "NOTA: " + score;
-        document.getElementById('tries-display').innerText = tries;
-        document.getElementById('feedback-msg').innerText = msg;
     }
 
     function resetGame() {
-        if(finished) return;
+        if(isRunning) return;
+        if(finished) { location.reload(); return; }
         steps = [];
         robotPos = { x: 0, y: 0 };
-        document.getElementById('sequence').innerText = "Seu Algoritmo: ";
+        document.getElementById('sequence-display').innerText = "💻 Algoritmo: ";
+        updateMessage("Aguardando seu comando...", "");
         createGrid();
     }
 
+    generateRandomGoal();
     createGrid();
 </script>
 
