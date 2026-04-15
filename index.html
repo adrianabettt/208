@@ -2,77 +2,202 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Avaliação de Algoritmos - 2º Ano</title>
+    <title>Algoritmos - 2º Ano</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #eef2f3; text-align: center; padding: 20px; }
-        .container { background: white; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
-        
-        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 5px; }
-        .subtitle { color: #7f8c8d; margin-bottom: 20px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; }
 
-        /* Estilo do Grid */
-        #grid { 
-            display: grid; grid-template-columns: repeat(5, 50px); grid-template-rows: repeat(5, 50px); 
-            gap: 5px; background-color: #34495e; padding: 10px; border-radius: 10px; margin: 20px auto; width: 270px;
+        body { font-family: 'Arial', sans-serif; background-color: #eef2f3; display: flex; flex-direction: column; }
+
+        .header { background: white; padding: 12px 24px; border-bottom: 2px solid #ddd; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .header h1 { color: #2c3e50; font-size: 20px; }
+        .header .subtitle { color: #7f8c8d; font-size: 13px; margin-top: 2px; }
+
+        .split { display: flex; flex: 1; overflow: hidden; gap: 1px; background: #ddd; }
+        .pane { background: #eef2f3; display: flex; flex-direction: column; overflow: hidden; }
+        .pane-left  { width: 50%; align-items: center; justify-content: center; }
+        .pane-right { flex: 1; overflow-y: auto; padding: 24px; }
+        .pane-right::-webkit-scrollbar { width: 6px; }
+        .pane-right::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+        .pane-label { font-size: 11px; font-weight: bold; color: #7f8c8d; text-transform: uppercase; letter-spacing: .06em; padding: 8px 16px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; width: 100%; }
+
+        .grid-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 24px; gap: 16px; }
+
+        #grid {
+            display: grid; grid-template-columns: repeat(5, 50px); grid-template-rows: repeat(5, 50px);
+            gap: 5px; background-color: #34495e; padding: 10px; border-radius: 10px;
         }
         .cell { width: 50px; height: 50px; background-color: #ecf0f1; display: flex; align-items: center; justify-content: center; font-size: 25px; border-radius: 5px; transition: 0.3s; }
-        
-        /* Área de Mensagens Coloridas (Substitui o Alert) */
+
+        .container { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; }
+
         #status-message {
             min-height: 60px; margin: 15px 0; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px;
             display: flex; align-items: center; justify-content: center; transition: 0.5s; background-color: #f8f9fa; border: 2px solid #ddd;
         }
-        .msg-error { background-color: #ffebee !important; color: #c62828 !important; border-color: #ef9a9a !important; animation: shake 0.5s; }
+        .msg-error   { background-color: #ffebee !important; color: #c62828 !important; border-color: #ef9a9a !important; animation: shake 0.5s; }
         .msg-success { background-color: #e8f5e9 !important; color: #2e7d32 !important; border-color: #a5d6a7 !important; font-size: 22px !important; }
 
-        /* Controles */
         .controls button { padding: 12px; font-size: 18px; cursor: pointer; border: none; border-radius: 8px; margin: 5px; transition: 0.2s; font-weight: bold; }
-        .btn-move { background-color: #3498db; color: white; box-shadow: 0 4px #2980b9; }
+        .btn-move  { background-color: #3498db; color: white; box-shadow: 0 4px #2980b9; }
         .btn-move:active { box-shadow: 0 0 #2980b9; transform: translateY(4px); }
-        .btn-run { background-color: #27ae60; color: white; width: 80%; margin-top: 15px; box-shadow: 0 4px #1e8449; }
+        .btn-run   { background-color: #27ae60; color: white; width: 80%; margin-top: 15px; box-shadow: 0 4px #1e8449; }
         .btn-reset { background-color: #e74c3c; color: white; box-shadow: 0 4px #c0392b; }
 
         #sequence-display { background: #34495e; color: #f1c40f; padding: 10px; min-height: 40px; margin: 15px 0; border-radius: 8px; font-size: 20px; word-wrap: break-word; }
 
-        /* Animação de erro */
         @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
+            0%   { transform: translateX(0); }
+            25%  { transform: translateX(-5px); }
+            50%  { transform: translateX(5px); }
+            75%  { transform: translateX(-5px); }
             100% { transform: translateX(0); }
         }
+
+        /* MODAL OVERLAY */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 48px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-top: 10px solid #27ae60;
+        }
+
+        @keyframes popUp {
+            from { transform: scale(0.7); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+
+        .modal-emoji { font-size: 64px; margin-bottom: 10px; }
+
+        .modal-title {
+            font-size: 26px; font-weight: bold; color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .modal-subtitle {
+            font-size: 15px; color: #7f8c8d;
+            margin-bottom: 24px;
+        }
+
+        .modal-score-wrap {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .modal-score-label {
+            font-size: 13px; font-weight: bold; color: rgba(255,255,255,0.85);
+            text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px;
+        }
+
+        .modal-score-num {
+            font-size: 72px; font-weight: bold; color: white;
+            line-height: 1;
+        }
+
+        .modal-score-max {
+            font-size: 14px; color: rgba(255,255,255,0.75); margin-top: 4px;
+        }
+
+        .modal-tries {
+            font-size: 14px; color: #7f8c8d; margin-bottom: 24px;
+        }
+
+        .modal-tries span { font-weight: bold; color: #2c3e50; }
+
+        .modal-stars { font-size: 32px; margin-bottom: 20px; letter-spacing: 4px; }
+
+        .modal-btn {
+            background-color: #27ae60; color: white;
+            border: none; border-radius: 10px;
+            padding: 14px 32px; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px #1e8449; width: 100%;
+        }
+        .modal-btn:hover  { background-color: #2ecc71; }
+        .modal-btn:active { transform: translateY(2px); box-shadow: 0 2px #1e8449; }
+
+        /* Score color variants */
+        .score-10 .modal-score-wrap { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .score-10 .modal-box        { border-top-color: #27ae60; }
+        .score-8  .modal-score-wrap { background: linear-gradient(135deg, #f39c12, #f1c40f); }
+        .score-8  .modal-box        { border-top-color: #f39c12; }
+        .score-6  .modal-score-wrap { background: linear-gradient(135deg, #e67e22, #f39c12); }
+        .score-6  .modal-box        { border-top-color: #e67e22; }
+        .score-5  .modal-score-wrap { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .score-5  .modal-box        { border-top-color: #e74c3c; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🤖 Missão Algoritmo</h1>
-    <p class="subtitle">Leve o robô até a maçã clicando nas setas!</p>
-    
-    <div id="grid"></div>
-
-    <div id="status-message">Aguardando seu comando...</div>
-
-    <div id="sequence-display">💻 Algoritmo: </div>
-
-    <div class="controls">
-        <button class="btn-move" onclick="addStep('⬆️')">⬆️</button>
-        <button class="btn-move" onclick="addStep('⬇️')">⬇️</button>
-        <button class="btn-move" onclick="addStep('⬅️')">⬅️</button>
-        <button class="btn-move" onclick="addStep('➡️')">➡️</button>
-        <br>
-        <button class="btn-run" onclick="runAlgorithm()">▶️ EXECUTAR ALGORITMO</button>
-        <button class="btn-reset" onclick="resetGame()">🔄 Limpar</button>
+<div class="header">
+    <div>
+        <h1>🤖 Missão Algoritmo</h1>
+        <div class="subtitle"></div>
     </div>
+</div>
+
+<div class="split">
+
+    <!-- ESQUERDA — GRID -->
+    <div class="pane pane-left">
+        <div class="pane-label">📍 LEVE O ROBÔ ATÉ A MAÇÃ, VOCÊ DEVE CLICAR NAS SETAS PARA FORMAR O CAMINHO!</div>
+        <div class="grid-wrap">
+            <div id="grid"></div>
+        </div>
+    </div>
+
+    <!-- DIREITA — CONTROLES -->
+    <div class="pane pane-right">
+        <div class="container">
+
+            <div id="status-message">Aguardando seu comando...</div>
+
+            <div id="sequence-display">💻 ALGORITMO: </div>
+
+            <div class="controls">
+                <button class="btn-move" onclick="addStep('⬆️')">⬆️</button>
+                <button class="btn-move" onclick="addStep('⬇️')">⬇️</button>
+                <button class="btn-move" onclick="addStep('⬅️')">⬅️</button>
+                <button class="btn-move" onclick="addStep('➡️')">➡️</button>
+                <br>
+                <button class="btn-run" onclick="runAlgorithm()">▶️ EXECUTAR ALGORITMO</button>
+                <button class="btn-reset" onclick="resetGame()">🔄 Limpar</button>
+            </div>
+
+        </div>
+    </div>
+
 </div>
 
 <script>
     const size = 5;
     let robotPos = { x: 0, y: 0 };
-    let goalPos = { x: 0, y: 0 }; 
-    let steps = [];
-    let tries = 0;
+    let goalPos  = { x: 0, y: 0 };
+    let steps    = [];
+    let tries    = 0;
     let finished = false;
     let isRunning = false;
 
@@ -102,13 +227,13 @@
     function updateMessage(text, type) {
         const msgDiv = document.getElementById('status-message');
         msgDiv.innerText = text;
-        msgDiv.className = ''; // Limpa classes
-        if (type === 'error') msgDiv.classList.add('msg-error');
+        msgDiv.className = '';
+        if (type === 'error')   msgDiv.classList.add('msg-error');
         if (type === 'success') msgDiv.classList.add('msg-success');
     }
 
     function addStep(dir) {
-        if(finished || isRunning) return;
+        if (finished || isRunning) return;
         if (steps.length < 20) {
             steps.push(dir);
             document.getElementById('sequence-display').innerText = "💻 Algoritmo: " + steps.join(' ');
@@ -117,25 +242,20 @@
     }
 
     async function runAlgorithm() {
-        if(finished || steps.length === 0 || isRunning) return;
-        
+        if (finished || steps.length === 0 || isRunning) return;
         isRunning = true;
         tries++;
         updateMessage("Executando passos...", "");
-        
         let currentPos = { x: 0, y: 0 };
-        
         for (let move of steps) {
             await new Promise(r => setTimeout(r, 400));
-            if (move === '⬆️' && currentPos.y > 0) currentPos.y--;
+            if      (move === '⬆️' && currentPos.y > 0)        currentPos.y--;
             else if (move === '⬇️' && currentPos.y < size - 1) currentPos.y++;
-            else if (move === '⬅️' && currentPos.x > 0) currentPos.x--;
+            else if (move === '⬅️' && currentPos.x > 0)        currentPos.x--;
             else if (move === '➡️' && currentPos.x < size - 1) currentPos.x++;
-            
             robotPos = { ...currentPos };
             createGrid();
         }
-
         checkResult();
     }
 
@@ -145,6 +265,7 @@
             finished = true;
             let score = (tries === 1) ? 10 : (tries === 2) ? 8 : (tries === 3) ? 6 : 5;
             updateMessage(`🎉 NOTA: ${score} (Tentativas: ${tries})`, "success");
+            showModal(score);
         } else {
             updateMessage("❌ O robô se perdeu! Tente ajustar o algoritmo.", "error");
             setTimeout(() => {
@@ -154,9 +275,29 @@
         }
     }
 
+    function showModal(score) {
+        const configs = {
+            10: { emoji: '🏆', subtitle: 'Perfeito! Acertou na primeira tentativa!', stars: '⭐⭐⭐', cls: 'score-10' },
+             8: { emoji: '🎉', subtitle: 'Muito bom! Conseguiu na segunda tentativa!', stars: '⭐⭐', cls: 'score-8' },
+             6: { emoji: '😊', subtitle: 'Bom trabalho! Conseguiu na terceira tentativa!', stars: '⭐', cls: 'score-6' },
+             5: { emoji: '💪', subtitle: 'Conseguiu! Continue praticando para melhorar!', stars: '⭐', cls: 'score-5' },
+        };
+        const c = configs[score];
+        document.getElementById('modal-emoji').textContent    = c.emoji;
+        document.getElementById('modal-subtitle').textContent = c.subtitle;
+        document.getElementById('modal-score').textContent    = score;
+        document.getElementById('modal-stars').textContent    = c.stars;
+        document.getElementById('modal-tries-num').textContent = tries;
+        const box = document.getElementById('modal-box');
+        box.className = 'modal-box ' + c.cls;
+        setTimeout(() => {
+            document.getElementById('modal-overlay').classList.add('open');
+        }, 600);
+    }
+
     function resetGame() {
-        if(isRunning) return;
-        if(finished) { location.reload(); return; }
+        if (isRunning) return;
+        if (finished) { location.reload(); return; }
         steps = [];
         robotPos = { x: 0, y: 0 };
         document.getElementById('sequence-display').innerText = "💻 Algoritmo: ";
@@ -167,6 +308,29 @@
     generateRandomGoal();
     createGrid();
 </script>
+
+<!-- MODAL DE CONCLUSÃO -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box" id="modal-box">
+        <div class="modal-emoji" id="modal-emoji">🎉</div>
+        <div class="modal-title">Atividade Concluída!</div>
+        <div class="modal-subtitle" id="modal-subtitle">Você levou o robô até a maçã!</div>
+
+        <div class="modal-score-wrap">
+            <div class="modal-score-label">Sua Nota</div>
+            <div class="modal-score-num" id="modal-score">10</div>
+            <div class="modal-score-max">de 0 a 10</div>
+        </div>
+
+        <div class="modal-stars" id="modal-stars">⭐⭐⭐</div>
+
+        <div class="modal-tries">
+            Tentativas realizadas: <span id="modal-tries-num">1</span>
+        </div>
+
+        <button class="modal-btn" onclick="location.reload()">🔄 Novo Desafio</button>
+    </div>
+</div>
 
 </body>
 </html>
