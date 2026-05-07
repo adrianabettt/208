@@ -2,335 +2,749 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Algoritmos - 2º Ano</title>
+    <title>Missão Algoritmo – 2º Ano</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { height: 100%; overflow: hidden; }
 
-        body { font-family: 'Arial', sans-serif; background-color: #eef2f3; display: flex; flex-direction: column; }
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --card: #273449;
+            --border: #334155;
+            --accent: #38bdf8;
+            --accent2: #818cf8;
+            --green: #4ade80;
+            --red: #f87171;
+            --yellow: #fbbf24;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --grid-bg: #0d1f35;
+            --cell: #1e3a5f;
+            --cell-hover: #1e4976;
+        }
 
-        .header { background: white; padding: 12px 24px; border-bottom: 2px solid #ddd; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-        .header h1 { color: #2c3e50; font-size: 20px; }
-        .header .subtitle { color: #7f8c8d; font-size: 13px; margin-top: 2px; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+        }
 
-        .split { display: flex; flex: 1; overflow: hidden; gap: 1px; background: #ddd; }
-        .pane { background: #eef2f3; display: flex; flex-direction: column; overflow: hidden; }
-        .pane-left  { width: 50%; align-items: center; justify-content: center; }
-        .pane-right { flex: 1; overflow-y: auto; padding: 24px; }
-        .pane-right::-webkit-scrollbar { width: 6px; }
-        .pane-right::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        /* ── HEADER ── */
+        .header {
+            background: var(--panel);
+            border-bottom: 2px solid var(--border);
+            padding: 10px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .header-left { display: flex; align-items: center; gap: 14px; }
+        .header h1 { font-size: 20px; font-weight: 900; color: var(--accent); letter-spacing: -.3px; }
+        .header .sub { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
 
-        .pane-label { font-size: 11px; font-weight: bold; color: #7f8c8d; text-transform: uppercase; letter-spacing: .06em; padding: 8px 16px; background: white; border-bottom: 1px solid #ddd; flex-shrink: 0; width: 100%; }
+        /* ── PHASE BAR ── */
+        .phase-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .phase-pip {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--card);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 800;
+            color: var(--muted);
+            transition: .3s;
+        }
+        .phase-pip.done   { background: var(--green); border-color: var(--green); color: #0f172a; }
+        .phase-pip.active { background: var(--accent); border-color: var(--accent); color: #0f172a; }
+        .phase-connector { width: 24px; height: 2px; background: var(--border); border-radius: 1px; }
+        .phase-connector.done { background: var(--green); }
 
-        .grid-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 24px; gap: 16px; }
+        .phase-label {
+            font-size: 12px; font-family: 'Space Mono', monospace;
+            color: var(--muted);
+            margin-left: 10px;
+        }
+        .phase-label span { color: var(--accent); font-weight: 700; }
 
+        /* ── SPLIT ── */
+        .split { display: flex; flex: 1; overflow: hidden; }
+
+        /* ── LEFT PANE ── */
+        .pane-left {
+            width: 52%;
+            border-right: 2px solid var(--border);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: var(--bg);
+        }
+
+        .pane-title {
+            font-size: 11px; font-family: 'Space Mono', monospace;
+            color: var(--muted); letter-spacing: .1em; text-transform: uppercase;
+            background: var(--panel); border: 1px solid var(--border);
+            padding: 5px 14px; border-radius: 20px;
+        }
+
+        /* GRID */
         #grid {
-            display: grid; grid-template-columns: repeat(5, 50px); grid-template-rows: repeat(5, 50px);
-            gap: 5px; background-color: #34495e; padding: 10px; border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 54px);
+            grid-template-rows: repeat(5, 54px);
+            gap: 5px;
+            background: var(--grid-bg);
+            padding: 10px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            box-shadow: 0 0 40px rgba(56,189,248,.08);
         }
-        .cell { width: 50px; height: 50px; background-color: #ecf0f1; display: flex; align-items: center; justify-content: center; font-size: 25px; border-radius: 5px; transition: 0.3s; }
+        .cell {
+            width: 54px; height: 54px;
+            background: var(--cell);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px;
+            transition: transform .15s, background .3s;
+        }
+        .cell.robot-trail {
+            background: rgba(56,189,248,.18);
+        }
 
-        .container { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 20px; }
+        /* PHASE OBJECTIVE TAG */
+        .obj-tag {
+            font-size: 13px; font-weight: 700;
+            background: var(--card); border: 1px solid var(--border);
+            padding: 6px 18px; border-radius: 20px; color: var(--text);
+        }
+        .obj-tag .highlight { color: var(--yellow); }
 
+        /* ── RIGHT PANE ── */
+        .pane-right {
+            flex: 1;
+            overflow-y: auto;
+            padding: 22px 24px;
+            background: var(--panel);
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .pane-right::-webkit-scrollbar { width: 5px; }
+        .pane-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        /* STATUS */
         #status-message {
-            min-height: 60px; margin: 15px 0; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px;
-            display: flex; align-items: center; justify-content: center; transition: 0.5s; background-color: #f8f9fa; border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 15px; font-weight: 700;
+            text-align: center;
+            background: var(--card);
+            border: 2px solid var(--border);
+            color: var(--muted);
+            transition: .4s;
+            min-height: 52px;
+            display: flex; align-items: center; justify-content: center;
         }
-        .msg-error   { background-color: #ffebee !important; color: #c62828 !important; border-color: #ef9a9a !important; animation: shake 0.5s; }
-        .msg-success { background-color: #e8f5e9 !important; color: #2e7d32 !important; border-color: #a5d6a7 !important; font-size: 22px !important; }
-
-        .controls button { padding: 12px; font-size: 18px; cursor: pointer; border: none; border-radius: 8px; margin: 5px; transition: 0.2s; font-weight: bold; }
-        .btn-move  { background-color: #3498db; color: white; box-shadow: 0 4px #2980b9; }
-        .btn-move:active { box-shadow: 0 0 #2980b9; transform: translateY(4px); }
-        .btn-run   { background-color: #27ae60; color: white; width: 80%; margin-top: 15px; box-shadow: 0 4px #1e8449; }
-        .btn-reset { background-color: #e74c3c; color: white; box-shadow: 0 4px #c0392b; }
-
-        #sequence-display { background: #34495e; color: #f1c40f; padding: 10px; min-height: 40px; margin: 15px 0; border-radius: 8px; font-size: 20px; word-wrap: break-word; }
+        .msg-error   { background: rgba(248,113,113,.15) !important; color: var(--red) !important; border-color: var(--red) !important; animation: shake .4s; }
+        .msg-success { background: rgba(74,222,128,.15) !important; color: var(--green) !important; border-color: var(--green) !important; }
 
         @keyframes shake {
-            0%   { transform: translateX(0); }
-            25%  { transform: translateX(-5px); }
-            50%  { transform: translateX(5px); }
-            75%  { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
+            0%  { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-6px); }
+            100%{ transform: translateX(0); }
         }
 
-        /* MODAL OVERLAY */
+        /* ALGORITHM DISPLAY */
+        .algo-box {
+            background: var(--grid-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            color: var(--accent);
+            min-height: 50px;
+            word-break: break-all;
+            line-height: 1.7;
+        }
+        .algo-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: .08em; text-transform: uppercase; }
+
+        /* BUTTONS */
+        .controls { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-arrow {
+            width: 58px; height: 58px;
+            font-size: 24px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background .15s, transform .1s, border-color .15s;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text);
+        }
+        .btn-arrow:hover  { background: var(--accent); border-color: var(--accent); }
+        .btn-arrow:active { transform: scale(.92); }
+
+        .btn-row { display: flex; gap: 8px; width: 100%; }
+
+        .btn-run {
+            flex: 1;
+            padding: 14px;
+            font-size: 15px; font-weight: 800; font-family: 'Nunito', sans-serif;
+            background: var(--green);
+            color: #0f172a;
+            border: none; border-radius: 12px;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            letter-spacing: .02em;
+        }
+        .btn-run:hover  { background: #86efac; }
+        .btn-run:active { transform: scale(.97); }
+
+        .btn-clear {
+            padding: 14px 18px;
+            font-size: 15px; font-weight: 800; font-family: 'Nunito', sans-serif;
+            background: var(--card);
+            color: var(--muted);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .2s;
+        }
+        .btn-clear:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+        /* ATTEMPTS INDICATOR */
+        .tries-row {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 13px; color: var(--muted);
+        }
+        .try-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--border);
+            transition: background .3s;
+        }
+        .try-dot.used { background: var(--red); }
+        .tries-row .tries-label { font-family: 'Space Mono', monospace; font-size: 11px; }
+
+        /* DIVIDER */
+        .divider { border: none; border-top: 1px solid var(--border); }
+
+        /* ──────────────────────────────────
+           MODAL
+        ────────────────────────────────── */
         .modal-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.7);
             z-index: 999;
-            align-items: center;
-            justify-content: center;
+            align-items: center; justify-content: center;
         }
-        .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
+        .modal-overlay.open { display: flex; animation: fadeIn .3s; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
         .modal-box {
-            background: white;
-            border-radius: 24px;
-            padding: 40px 48px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 28px;
+            padding: 44px 52px;
             text-align: center;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-top: 10px solid #27ae60;
+            max-width: 440px;
+            width: 92%;
+            box-shadow: 0 30px 80px rgba(0,0,0,.6);
+            animation: popUp .38s cubic-bezier(.175,.885,.32,1.275);
         }
+        @keyframes popUp { from{transform:scale(.7);opacity:0} to{transform:scale(1);opacity:1} }
 
-        @keyframes popUp {
-            from { transform: scale(0.7); opacity: 0; }
-            to   { transform: scale(1);   opacity: 1; }
+        .modal-emoji { font-size: 72px; margin-bottom: 8px; }
+        .modal-title { font-size: 28px; font-weight: 900; margin-bottom: 6px; color: var(--text); }
+        .modal-sub   { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+        .score-ring-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 24px; }
+        .score-ring-wrap svg { transform: rotate(-90deg); }
+        .score-ring-track { fill: none; stroke: var(--border); stroke-width: 10; }
+        .score-ring-fill  { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s ease, stroke .5s; }
+        .score-center {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
         }
+        .score-num   { font-size: 52px; font-weight: 900; line-height: 1; font-family: 'Space Mono', monospace; }
+        .score-of    { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
 
-        .modal-emoji { font-size: 64px; margin-bottom: 10px; }
-
-        .modal-title {
-            font-size: 26px; font-weight: bold; color: #2c3e50;
-            margin-bottom: 6px;
-        }
-
-        .modal-subtitle {
-            font-size: 15px; color: #7f8c8d;
-            margin-bottom: 24px;
-        }
-
-        .modal-score-wrap {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-
-        .modal-score-label {
-            font-size: 13px; font-weight: bold; color: rgba(255,255,255,0.85);
-            text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px;
-        }
-
-        .modal-score-num {
-            font-size: 72px; font-weight: bold; color: white;
-            line-height: 1;
-        }
-
-        .modal-score-max {
-            font-size: 14px; color: rgba(255,255,255,0.75); margin-top: 4px;
-        }
-
-        .modal-tries {
-            font-size: 14px; color: #7f8c8d; margin-bottom: 24px;
-        }
-
-        .modal-tries span { font-weight: bold; color: #2c3e50; }
-
-        .modal-stars { font-size: 32px; margin-bottom: 20px; letter-spacing: 4px; }
+        .modal-stars { font-size: 34px; letter-spacing: 6px; margin-bottom: 8px; }
+        .modal-detail { font-size: 13px; color: var(--muted); margin-bottom: 28px; font-family: 'Space Mono', monospace; }
 
         .modal-btn {
-            background-color: #27ae60; color: white;
-            border: none; border-radius: 10px;
-            padding: 14px 32px; font-size: 16px; font-weight: bold;
-            cursor: pointer; transition: 0.2s;
-            box-shadow: 0 4px #1e8449; width: 100%;
+            background: var(--accent);
+            color: #0f172a;
+            border: none; border-radius: 12px;
+            padding: 15px 0; font-size: 16px; font-weight: 900;
+            cursor: pointer; width: 100%;
+            transition: background .2s, transform .1s;
+            letter-spacing: .02em;
         }
-        .modal-btn:hover  { background-color: #2ecc71; }
-        .modal-btn:active { transform: translateY(2px); box-shadow: 0 2px #1e8449; }
+        .modal-btn:hover  { background: #7dd3fc; }
+        .modal-btn:active { transform: scale(.97); }
 
-        /* Score color variants */
-        .score-10 .modal-score-wrap { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .score-10 .modal-box        { border-top-color: #27ae60; }
-        .score-8  .modal-score-wrap { background: linear-gradient(135deg, #f39c12, #f1c40f); }
-        .score-8  .modal-box        { border-top-color: #f39c12; }
-        .score-6  .modal-score-wrap { background: linear-gradient(135deg, #e67e22, #f39c12); }
-        .score-6  .modal-box        { border-top-color: #e67e22; }
-        .score-5  .modal-score-wrap { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-        .score-5  .modal-box        { border-top-color: #e74c3c; }
+        /* PHASE TRANSITION MODAL */
+        .phase-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.7);
+            z-index: 998;
+            align-items: center; justify-content: center;
+        }
+        .phase-modal-overlay.open { display: flex; animation: fadeIn .3s; }
+
+        .phase-modal-box {
+            background: var(--panel);
+            border: 2px solid var(--accent2);
+            border-radius: 24px;
+            padding: 36px 44px;
+            text-align: center;
+            max-width: 360px;
+            width: 88%;
+            animation: popUp .35s cubic-bezier(.175,.885,.32,1.275);
+        }
+        .phase-modal-box .pm-emoji { font-size: 60px; margin-bottom: 10px; }
+        .phase-modal-box .pm-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
+        .phase-modal-box .pm-sub   { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+        .phase-modal-box .pm-score-info {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;
+            font-family: 'Space Mono', monospace; font-size: 13px;
+        }
+        .phase-modal-box .pm-score-info .pm-deduct {
+            color: var(--red); font-weight: 700; font-size: 14px;
+        }
+        .phase-modal-box .pm-score-info .pm-ok {
+            color: var(--green); font-weight: 700; font-size: 14px;
+        }
+        .pm-btn {
+            background: var(--accent2);
+            color: white;
+            border: none; border-radius: 12px;
+            padding: 13px 0; font-size: 15px; font-weight: 800;
+            cursor: pointer; width: 100%;
+            transition: .2s;
+        }
+        .pm-btn:hover { background: #a5b4fc; }
     </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <div class="header">
-    <div>
-        <h1>🤖 Missão Algoritmo</h1>
-        <div class="subtitle"></div>
+    <div class="header-left">
+        <div>
+            <h1>🤖 Missão Algoritmo</h1>
+            <div class="sub">Leve o robô até o objetivo!</div>
+        </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+        <div class="phase-bar" id="phase-bar">
+            <div class="phase-pip active" id="pip-1">1</div>
+            <div class="phase-connector" id="conn-1"></div>
+            <div class="phase-pip" id="pip-2">2</div>
+            <div class="phase-connector" id="conn-2"></div>
+            <div class="phase-pip" id="pip-3">3</div>
+        </div>
+        <div class="phase-label">Fase <span id="phase-num">1</span> de 3</div>
     </div>
 </div>
 
+<!-- SPLIT -->
 <div class="split">
 
-    <!-- ESQUERDA — GRID -->
-    <div class="pane pane-left">
-        <div class="pane-label">📍 LEVE O ROBÔ ATÉ A MAÇÃ, VOCÊ DEVE CLICAR NAS SETAS PARA FORMAR O CAMINHO!</div>
-        <div class="grid-wrap">
-            <div id="grid"></div>
-        </div>
+    <!-- LEFT -->
+    <div class="pane-left">
+        <div class="pane-title" id="grid-label">📍 Fase 1 — Leve o 🤖 até o objetivo!</div>
+        <div id="grid"></div>
+        <div class="obj-tag" id="obj-tag">Objetivo: <span class="highlight" id="obj-text">—</span></div>
     </div>
 
-    <!-- DIREITA — CONTROLES -->
-    <div class="pane pane-right">
-        <div class="container">
+    <!-- RIGHT -->
+    <div class="pane-right">
 
-            <div id="status-message">Aguardando seu comando...</div>
+        <div id="status-message">Aguardando seu comando...</div>
 
-            <div id="sequence-display">💻 ALGORITMO: </div>
+        <div>
+            <div class="algo-label">💻 Algoritmo Montado</div>
+            <div class="algo-box" id="sequence-display">—</div>
+        </div>
 
-            <div class="controls">
-                <button class="btn-move" onclick="addStep('⬆️')">⬆️</button>
-                <button class="btn-move" onclick="addStep('⬇️')">⬇️</button>
-                <button class="btn-move" onclick="addStep('⬅️')">⬅️</button>
-                <button class="btn-move" onclick="addStep('➡️')">➡️</button>
-                <br>
-                <button class="btn-run" onclick="runAlgorithm()">▶️ EXECUTAR ALGORITMO</button>
-                <button class="btn-reset" onclick="resetGame()">🔄 Limpar</button>
+        <div class="controls" id="arrow-controls">
+            <!-- Row 1: up -->
+            <div style="width:100%;display:flex;justify-content:center;">
+                <button class="btn-arrow" onclick="addStep('⬆️')" title="Cima">⬆️</button>
             </div>
-
+            <!-- Row 2: left/down/right -->
+            <div style="width:100%;display:flex;justify-content:center;gap:8px;">
+                <button class="btn-arrow" onclick="addStep('⬅️')" title="Esquerda">⬅️</button>
+                <button class="btn-arrow" onclick="addStep('⬇️')" title="Baixo">⬇️</button>
+                <button class="btn-arrow" onclick="addStep('➡️')" title="Direita">➡️</button>
+            </div>
         </div>
-    </div>
 
+        <hr class="divider">
+
+        <div class="tries-row">
+            <div class="tries-label">TENTATIVAS:</div>
+            <div class="try-dot" id="dot-1"></div>
+            <div class="try-dot" id="dot-2"></div>
+            <div class="try-dot" id="dot-3"></div>
+            <div class="try-dot" id="dot-4"></div>
+            <div style="flex:1"></div>
+            <div style="font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);" id="tries-counter">0 tentativas</div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-run"   onclick="runAlgorithm()">▶️ Executar</button>
+            <button class="btn-clear" onclick="clearSteps()">🗑️ Limpar</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- PHASE TRANSITION MODAL -->
+<div class="phase-modal-overlay" id="phase-modal">
+    <div class="phase-modal-box">
+        <div class="pm-emoji" id="pm-emoji">✅</div>
+        <div class="pm-title" id="pm-title">Fase 1 Concluída!</div>
+        <div class="pm-sub"  id="pm-sub">Você levou o robô até o objetivo!</div>
+        <div class="pm-score-info" id="pm-score-info">...</div>
+        <button class="pm-btn" id="pm-btn" onclick="nextPhase()">Próxima Fase ➜</button>
+    </div>
+</div>
+
+<!-- FINAL MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-emoji" id="modal-emoji">🏆</div>
+        <div class="modal-title">Missão Completa!</div>
+        <div class="modal-sub"  id="modal-sub">Você completou as 3 fases!</div>
+
+        <div class="score-ring-wrap">
+            <svg viewBox="0 0 160 160" width="160" height="160">
+                <circle class="score-ring-track" cx="80" cy="80" r="70"/>
+                <circle class="score-ring-fill" id="ring-fill" cx="80" cy="80" r="70"
+                        stroke-dasharray="439.82" stroke-dashoffset="439.82" stroke="var(--green)"/>
+            </svg>
+            <div class="score-center">
+                <div class="score-num" id="final-score">0</div>
+                <div class="score-of">/ 10</div>
+            </div>
+        </div>
+
+        <div class="modal-stars" id="modal-stars">⭐</div>
+        <div class="modal-detail" id="modal-detail"></div>
+
+        <button class="modal-btn" onclick="location.reload()">🔄 Jogar Novamente</button>
+    </div>
 </div>
 
 <script>
-    const size = 5;
-    let robotPos = { x: 0, y: 0 };
-    let goalPos  = { x: 0, y: 0 };
-    let steps    = [];
-    let tries    = 0;
-    let finished = false;
-    let isRunning = false;
+// ═══════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════
+const SIZE = 5;
 
-    function generateRandomGoal() {
-        let newX, newY;
-        do {
-            newX = Math.floor(Math.random() * size);
-            newY = Math.floor(Math.random() * size);
-        } while (newX === 0 && newY === 0);
-        goalPos = { x: newX, y: newY };
-    }
+// Each phase has its own goal emoji and a different grid size feel
+const PHASE_GOALS = [
+    { emoji: '🍎', label: 'Maçã' },
+    { emoji: '⭐', label: 'Estrela' },
+    { emoji: '🏆', label: 'Troféu' },
+];
 
-    function createGrid() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                if (x === robotPos.x && y === robotPos.y) cell.innerText = '🤖';
-                else if (x === goalPos.x && y === goalPos.y) cell.innerText = '🍎';
-                grid.appendChild(cell);
-            }
+let currentPhase  = 0;   // 0-indexed
+let robotPos      = { x:0, y:0 };
+let goalPos       = { x:0, y:0 };
+let steps         = [];
+let phaseTries    = 0;    // tries in current phase
+let totalDeductions = 0;  // total penalty across phases
+let isRunning     = false;
+let phaseFinished = false;
+let trailCells    = [];
+
+// ═══════════════════════════════════════════════
+//  GRID
+// ═══════════════════════════════════════════════
+function generateGoal() {
+    let nx, ny;
+    do {
+        nx = Math.floor(Math.random() * SIZE);
+        ny = Math.floor(Math.random() * SIZE);
+    } while (nx === 0 && ny === 0);
+    goalPos = { x: nx, y: ny };
+}
+
+function createGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    trailCells = [];
+    for (let y = 0; y < SIZE; y++) {
+        for (let x = 0; x < SIZE; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.id = `cell-${x}-${y}`;
+            if (x === robotPos.x && y === robotPos.y) cell.innerText = '🤖';
+            else if (x === goalPos.x && y === goalPos.y) cell.innerText = PHASE_GOALS[currentPhase].emoji;
+            grid.appendChild(cell);
         }
     }
+}
 
-    function updateMessage(text, type) {
-        const msgDiv = document.getElementById('status-message');
-        msgDiv.innerText = text;
-        msgDiv.className = '';
-        if (type === 'error')   msgDiv.classList.add('msg-error');
-        if (type === 'success') msgDiv.classList.add('msg-success');
+function markTrail(x, y) {
+    const cell = document.getElementById(`cell-${x}-${y}`);
+    if (cell && !(x === robotPos.x && y === robotPos.y)) {
+        cell.classList.add('robot-trail');
     }
+}
 
-    function addStep(dir) {
-        if (finished || isRunning) return;
-        if (steps.length < 20) {
-            steps.push(dir);
-            document.getElementById('sequence-display').innerText = "💻 Algoritmo: " + steps.join(' ');
-            updateMessage("Montando sequência...", "");
-        }
+// ═══════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════
+function updateMessage(text, type) {
+    const el = document.getElementById('status-message');
+    el.textContent = text;
+    el.className = '';
+    if (type === 'error')   el.classList.add('msg-error');
+    if (type === 'success') el.classList.add('msg-success');
+}
+
+function updateAlgoDisplay() {
+    const el = document.getElementById('sequence-display');
+    el.textContent = steps.length ? steps.join('  ') : '—';
+}
+
+function updateTries() {
+    document.getElementById('tries-counter').textContent = phaseTries + (phaseTries === 1 ? ' tentativa' : ' tentativas');
+    for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        dot.className = 'try-dot' + (i <= phaseTries ? ' used' : '');
     }
+}
 
-    async function runAlgorithm() {
-        if (finished || steps.length === 0 || isRunning) return;
-        isRunning = true;
-        tries++;
-        updateMessage("Executando passos...", "");
-        let currentPos = { x: 0, y: 0 };
-        for (let move of steps) {
-            await new Promise(r => setTimeout(r, 400));
-            if      (move === '⬆️' && currentPos.y > 0)        currentPos.y--;
-            else if (move === '⬇️' && currentPos.y < size - 1) currentPos.y++;
-            else if (move === '⬅️' && currentPos.x > 0)        currentPos.x--;
-            else if (move === '➡️' && currentPos.x < size - 1) currentPos.x++;
-            robotPos = { ...currentPos };
-            createGrid();
-        }
-        checkResult();
+function updatePhasePips() {
+    for (let i = 1; i <= 3; i++) {
+        const pip  = document.getElementById(`pip-${i}`);
+        const conn = i < 3 ? document.getElementById(`conn-${i}`) : null;
+        pip.className = 'phase-pip';
+        if (i - 1 < currentPhase)       { pip.classList.add('done'); pip.textContent = '✓'; if(conn) conn.classList.add('done'); }
+        else if (i - 1 === currentPhase) { pip.classList.add('active'); pip.textContent = i; }
+        else                             { pip.textContent = i; if(conn) conn.classList.remove('done'); }
     }
+    document.getElementById('phase-num').textContent = currentPhase + 1;
+}
 
-    function checkResult() {
-        isRunning = false;
-        if (robotPos.x === goalPos.x && robotPos.y === goalPos.y) {
-            finished = true;
-            let score = (tries === 1) ? 10 : (tries === 2) ? 8 : (tries === 3) ? 6 : 5;
-            updateMessage(`🎉 NOTA: ${score} (Tentativas: ${tries})`, "success");
-            showModal(score);
-        } else {
-            updateMessage("❌ O robô se perdeu! Tente ajustar o algoritmo.", "error");
-            setTimeout(() => {
-                robotPos = { x: 0, y: 0 };
-                createGrid();
-            }, 1500);
-        }
+// ═══════════════════════════════════════════════
+//  CONTROLS
+// ═══════════════════════════════════════════════
+function addStep(dir) {
+    if (phaseFinished || isRunning) return;
+    if (steps.length < 25) {
+        steps.push(dir);
+        updateAlgoDisplay();
+        updateMessage('Montando sequência...', '');
     }
+}
 
-    function showModal(score) {
-        const configs = {
-            10: { emoji: '🏆', subtitle: 'Perfeito! Acertou na primeira tentativa!', stars: '⭐⭐⭐', cls: 'score-10' },
-             8: { emoji: '🎉', subtitle: 'Muito bom! Conseguiu na segunda tentativa!', stars: '⭐⭐', cls: 'score-8' },
-             6: { emoji: '😊', subtitle: 'Bom trabalho! Conseguiu na terceira tentativa!', stars: '⭐', cls: 'score-6' },
-             5: { emoji: '💪', subtitle: 'Conseguiu! Continue praticando para melhorar!', stars: '⭐', cls: 'score-5' },
-        };
-        const c = configs[score];
-        document.getElementById('modal-emoji').textContent    = c.emoji;
-        document.getElementById('modal-subtitle').textContent = c.subtitle;
-        document.getElementById('modal-score').textContent    = score;
-        document.getElementById('modal-stars').textContent    = c.stars;
-        document.getElementById('modal-tries-num').textContent = tries;
-        const box = document.getElementById('modal-box');
-        box.className = 'modal-box ' + c.cls;
-        setTimeout(() => {
-            document.getElementById('modal-overlay').classList.add('open');
-        }, 600);
-    }
+function clearSteps() {
+    if (isRunning) return;
+    steps = [];
+    updateAlgoDisplay();
+    updateMessage('Aguardando seu comando...', '');
+}
 
-    function resetGame() {
-        if (isRunning) return;
-        if (finished) { location.reload(); return; }
-        steps = [];
-        robotPos = { x: 0, y: 0 };
-        document.getElementById('sequence-display').innerText = "💻 Algoritmo: ";
-        updateMessage("Aguardando seu comando...", "");
-        createGrid();
-    }
-
-    generateRandomGoal();
+// ═══════════════════════════════════════════════
+//  RUN
+// ═══════════════════════════════════════════════
+async function runAlgorithm() {
+    if (phaseFinished || steps.length === 0 || isRunning) return;
+    isRunning = true;
+    phaseTries++;
+    updateTries();
+    updateMessage('Executando...', '');
+    // Clear trail
     createGrid();
+
+    let pos = { x:0, y:0 };
+    for (const move of steps) {
+        await delay(360);
+        markTrail(pos.x, pos.y);
+        if      (move === '⬆️' && pos.y > 0)         pos.y--;
+        else if (move === '⬇️' && pos.y < SIZE - 1)  pos.y++;
+        else if (move === '⬅️' && pos.x > 0)         pos.x--;
+        else if (move === '➡️' && pos.x < SIZE - 1)  pos.x++;
+        robotPos = { ...pos };
+        updateRobotOnGrid();
+    }
+    checkResult();
+}
+
+function updateRobotOnGrid() {
+    // Clear all robots
+    document.querySelectorAll('.cell').forEach(c => {
+        if (c.textContent === '🤖') c.textContent = '';
+    });
+    const cell = document.getElementById(`cell-${robotPos.x}-${robotPos.y}`);
+    if (cell) cell.textContent = '🤖';
+    // Re-draw goal if robot moved off it
+    const gc = document.getElementById(`cell-${goalPos.x}-${goalPos.y}`);
+    if (gc && gc.textContent === '') gc.textContent = PHASE_GOALS[currentPhase].emoji;
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function checkResult() {
+    isRunning = false;
+    if (robotPos.x === goalPos.x && robotPos.y === goalPos.y) {
+        phaseFinished = true;
+
+        // Penalty: each failed attempt before this = -1
+        const failedAttempts = phaseTries - 1;
+        const phaseDeduction = failedAttempts; // -1 per failed attempt
+        totalDeductions += phaseDeduction;
+
+        updateMessage(`✅ Fase ${currentPhase + 1} concluída!`, 'success');
+        setTimeout(() => showPhaseModal(failedAttempts, phaseDeduction), 700);
+    } else {
+        updateMessage('❌ O robô se perdeu! Ajuste o algoritmo e tente novamente.', 'error');
+        setTimeout(() => {
+            robotPos = { x:0, y:0 };
+            steps = [];
+            updateAlgoDisplay();
+            createGrid();
+            updateMessage('Tente novamente! Monte um novo algoritmo.', '');
+        }, 1600);
+    }
+}
+
+// ═══════════════════════════════════════════════
+//  PHASE MODAL
+// ═══════════════════════════════════════════════
+function showPhaseModal(failedAttempts, phaseDeduction) {
+    const modal = document.getElementById('phase-modal');
+    document.getElementById('pm-title').textContent = `Fase ${currentPhase + 1} Concluída! 🎉`;
+
+    const isLast = currentPhase === 2;
+
+    if (failedAttempts === 0) {
+        document.getElementById('pm-emoji').textContent = '🌟';
+        document.getElementById('pm-sub').textContent = 'Perfeito! Acertou de primeira!';
+        document.getElementById('pm-score-info').innerHTML =
+            `<div class="pm-ok">+0 penalidade nesta fase</div><div style="color:var(--muted);font-size:12px;margin-top:4px;">Parabéns, nenhuma tentativa perdida!</div>`;
+    } else {
+        document.getElementById('pm-emoji').textContent = failedAttempts >= 3 ? '😅' : '😊';
+        document.getElementById('pm-sub').textContent = `Conseguiu após ${phaseTries} tentativa${phaseTries > 1 ? 's' : ''}!`;
+        document.getElementById('pm-score-info').innerHTML =
+            `<div class="pm-deduct">-${phaseDeduction} ponto${phaseDeduction > 1 ? 's' : ''} (${failedAttempts} tentativa${failedAttempts > 1 ? 's' : ''} errada${failedAttempts > 1 ? 's' : ''})</div>
+             <div style="color:var(--muted);font-size:12px;margin-top:4px;">Penalidade acumulada até agora: -${totalDeductions}</div>`;
+    }
+
+    const btn = document.getElementById('pm-btn');
+    if (isLast) {
+        btn.textContent = '🏆 Ver Resultado Final';
+    } else {
+        btn.textContent = `Fase ${currentPhase + 2} ➜`;
+    }
+
+    modal.classList.add('open');
+}
+
+function nextPhase() {
+    document.getElementById('phase-modal').classList.remove('open');
+
+    if (currentPhase === 2) {
+        showFinalModal();
+        return;
+    }
+
+    currentPhase++;
+    phaseTries   = 0;
+    phaseFinished = false;
+    steps        = [];
+    robotPos     = { x:0, y:0 };
+
+    generateGoal();
+    updateAlgoDisplay();
+    updateMessage('Aguardando seu comando...', '');
+    updatePhasePips();
+    updateTries();
+    createGrid();
+
+    document.getElementById('grid-label').textContent = `📍 Fase ${currentPhase + 1} — Leve o 🤖 até o objetivo!`;
+    document.getElementById('obj-text').textContent = PHASE_GOALS[currentPhase].label + ' ' + PHASE_GOALS[currentPhase].emoji;
+}
+
+// ═══════════════════════════════════════════════
+//  FINAL MODAL
+// ═══════════════════════════════════════════════
+function showFinalModal() {
+    const raw   = 10 - totalDeductions;
+    const score = Math.max(0, raw);
+
+    // Stars
+    let stars = '', emoji = '', sub = '';
+    if (score === 10)      { stars = '⭐⭐⭐'; emoji = '🏆'; sub = 'Incrível! Acertou todas as fases de primeira!'; }
+    else if (score >= 8)   { stars = '⭐⭐⭐'; emoji = '🎉'; sub = 'Muito bom! Quase perfeito!'; }
+    else if (score >= 6)   { stars = '⭐⭐';  emoji = '😊'; sub = 'Bom trabalho! Continue praticando!'; }
+    else if (score >= 4)   { stars = '⭐';   emoji = '💪'; sub = 'Conseguiu! Tente melhorar na próxima!'; }
+    else                   { stars = '⭐';   emoji = '🤔'; sub = 'Não desista! Pratique mais e melhore!'; }
+
+    document.getElementById('modal-emoji').textContent = emoji;
+    document.getElementById('modal-sub').textContent   = sub;
+    document.getElementById('modal-stars').textContent = stars;
+    document.getElementById('modal-detail').innerHTML  =
+        `Penalidades: -${totalDeductions} ponto${totalDeductions !== 1 ? 's' : ''}<br>Nota final = 10 − ${totalDeductions} = ${score}`;
+
+    // Animate score number
+    const numEl = document.getElementById('final-score');
+    numEl.textContent = '0';
+    let ringColor = score >= 8 ? 'var(--green)' : score >= 6 ? 'var(--yellow)' : 'var(--red)';
+    const ringFill = document.getElementById('ring-fill');
+    ringFill.style.stroke = ringColor;
+
+    document.getElementById('modal-overlay').classList.add('open');
+
+    // Animate count-up + ring
+    setTimeout(() => {
+        const circumference = 439.82;
+        const offset = circumference - (score / 10) * circumference;
+        ringFill.style.strokeDashoffset = offset;
+
+        let current = 0;
+        const step = () => {
+            if (current < score) {
+                current++;
+                numEl.textContent = current;
+                setTimeout(step, 80);
+            }
+        };
+        step();
+    }, 400);
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+function init() {
+    generateGoal();
+    createGrid();
+    updatePhasePips();
+    updateAlgoDisplay();
+    document.getElementById('obj-text').textContent = PHASE_GOALS[0].label + ' ' + PHASE_GOALS[0].emoji;
+}
+
+init();
 </script>
-
-<!-- MODAL DE CONCLUSÃO -->
-<div class="modal-overlay" id="modal-overlay">
-    <div class="modal-box" id="modal-box">
-        <div class="modal-emoji" id="modal-emoji">🎉</div>
-        <div class="modal-title">Atividade Concluída!</div>
-        <div class="modal-subtitle" id="modal-subtitle">Você levou o robô até a maçã!</div>
-
-        <div class="modal-score-wrap">
-            <div class="modal-score-label">Sua Nota</div>
-            <div class="modal-score-num" id="modal-score">10</div>
-            <div class="modal-score-max">de 0 a 10</div>
-        </div>
-
-        <div class="modal-stars" id="modal-stars">⭐⭐⭐</div>
-
-        <div class="modal-tries">
-            Tentativas realizadas: <span id="modal-tries-num">1</span>
-        </div>
-
-        <button class="modal-btn" onclick="location.reload()">🔄 Novo Desafio</button>
-    </div>
-</div>
 
 </body>
 </html>
